@@ -134,7 +134,68 @@ async function displayPopularTVShows(){
    })
 }
 
+async function displayTVShowDetails() {
 
+    const movieID=window.location.search.split('=')[1];
+    const movie= await fetchAPIData(`tv/${movieID}`)
+    const div = document.createElement('div')
+    div.classList.add('show-details')
+    div.innerHTML=`
+    <div class="details-top">
+          <div>
+          ${movie.poster_path?
+            `<img
+            src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
+            class="card-img-top"
+            alt="${movie.name}"
+            />`:
+            `<img
+            src="../images/no-image.jpg"
+            class="card-img-top"
+            alt="${movie.name}"
+            />`
+    }          </div>
+          <div>
+            <h2>${movie.name}</h2>
+            <p>
+              <i class="fas fa-star text-primary"></i>
+              ${movie.vote_average.toFixed(1)} / 10
+            </p>
+            <p class="text-muted">Release Date: XX/XX/XXXX</p>
+            <p>
+            ${movie.overview}
+            </p>
+            <h5>Genres</h5>
+            <ul class="list-group">
+              ${
+                movie.genres.map((genre)=>`
+                    <li>${genre.name}</li>
+                `).join('')
+              }
+            </ul>
+            <a href="${movie.homepage}" target="_blank" class="btn">Visit Show Homepage</a>
+          </div>
+        </div>
+        <div class="details-bottom">
+          <h2>Show Info</h2>
+          <ul>
+            <li><span class="text-secondary">Number Of Episodes:</span> ${movie.number_of_seasons}</li>
+            <li>
+              <span class="text-secondary">Last Episode To Air:</span> ${movie.last_air_date}
+              Aired Show Episode
+            </li>
+            <li><span class="text-secondary">Status:</span> ${movie.status}</li>
+          </ul>
+          <h4>Production Companies</h4>
+          <div class="list-group">
+            ${movie.production_companies.map((company)=>`${company.name}  `
+
+           )}
+          </div>
+        </div>
+    `
+    document.querySelector('#show-details').appendChild(div)
+}
 
 // Fetch data from tmdb
 async function fetchAPIData(endpoint) {
@@ -180,7 +241,7 @@ function init(){
             displayMovieDetails()
             break;
         case '/tv-details.html':
-            console.log('TV Details');
+            displayTVShowDetails();
             break;
         case '/search.html':
             console.log('Search');
