@@ -1,6 +1,10 @@
+const button = document.getElementById('btn-search')
+const inputSearch= document.getElementById('search-term')
+
 const global= {
     currentPage: window.location.pathname,
 }
+// const btn = document.getElementsById('btn-search')
 
 async function displayPopularMovies(){
     const {results}= await fetchAPIData('movie/popular')
@@ -45,8 +49,8 @@ async function displayPopularMovies(){
 async function displayMovieDetails(){
     const movieID= window.location.search.split('=')[1 ];
     const movie= await fetchAPIData(`movie/${movieID}`)
-    // const data= await results.json
-    // console.log(results);
+
+    displayOverLayBackground('movie', movie.backdrop_path)
 
 const div= document.createElement('div')
     div.classList.add('movie-details')
@@ -101,6 +105,7 @@ const div= document.createElement('div')
         document.querySelector('#movie-details').appendChild(div)
 }
 
+
 async function displayPopularTVShows(){
     const {results}= await fetchAPIData('tv/popular')
     console.log(results);
@@ -138,6 +143,9 @@ async function displayTVShowDetails() {
 
     const movieID=window.location.search.split('=')[1];
     const movie= await fetchAPIData(`tv/${movieID}`)
+
+    displayOverLayBackground('show', movie.backdrop_path)
+
     const div = document.createElement('div')
     div.classList.add('show-details')
     div.innerHTML=`
@@ -197,6 +205,80 @@ async function displayTVShowDetails() {
     document.querySelector('#show-details').appendChild(div)
 }
 
+function displayOverLayBackground(type, backgroundPath){
+    const overlay = document.createElement('div') 
+    overlay.style.backgroundImage=`url(https://image.tmdb.org/t/p/original/${backgroundPath})`
+    overlay.style.backgroundPosition = 'center'
+    overlay.style.backgroundSize = 'cover'
+    overlay.style.backgroundRepeat = 'no-repeat'
+    overlay.style.height = '185vh'
+    overlay.style.position = 'absolute'
+    overlay.style.width = '100vw'
+    overlay.style.top = '0'
+    overlay.style.left = '0'
+    overlay.style.opacity = '0.1'
+    overlay.style.zIndex = '-1' 
+
+
+    if (type ==='movie'){
+        document.querySelector('#movie-details').appendChild(overlay)
+    }else{
+        document.querySelector('#show-details').appendChild(overlay)
+    }
+}
+
+async function displaySwipers() {
+    const {results} = await fetchAPIData('movie/now_playing')
+       // console.log(results);
+    results.forEach((movie)=>{
+          const div= document.createElement('div');
+        div.classList.add("swiper-slide");
+        div.innerHTM=`           
+        <a href="movie-details.html?id=${movie.id}">
+             <img
+               src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
+               class="card-img-top"
+               alt="${movie.title}"
+           />
+            </a>
+        <h4 class="swiper-rating">
+            <i class="fas fa-star text-secondary"></i> ${movie.vote_average} / 10
+        </h4>`
+        document.querySelector('.swiper-wrapper').appendChild(div)
+       
+        initSwiper();
+    
+    })
+
+}
+
+function initSwiper() {
+    const swiper= new Swiper('.swiper',{
+        slidesPerView: 1,
+        loop: true,
+        freeMode: true,
+        spaceBetween: 30,
+        autoplay: {
+            delay: 4000,
+            disableOnInteraction: false,
+        },
+        breakpoint:{
+            500:{
+                slidesPerView: 2
+            },
+            700:{
+                slidesPerView: 3
+            },
+            1200:{
+                slidesPerView: 4
+            }
+        },
+        pagination: {
+            el: '.swiper-pagination',
+          }
+    });
+}
+
 // Fetch data from tmdb
 async function fetchAPIData(endpoint) {
     const API_KEY= '653550611524bb609fd554459e37dbde' ;
@@ -232,7 +314,10 @@ function init(){
     switch (global.currentPage) {
         case '/':
         case '/index.html':
+            displaySwipers();
             displayPopularMovies();
+            initSwiper();
+
             break;
         case '/shows.html':
             displayPopularTVShows();
@@ -244,7 +329,7 @@ function init(){
             displayTVShowDetails();
             break;
         case '/search.html':
-            console.log('Search');
+            searchMovies();
             break;
                                                     
         default:
@@ -253,8 +338,14 @@ function init(){
     highlight();
 
 }
+function searchMovies(e) {
+//    console.log( inputSearch.value)
+    console.log('e.target');
+    
+}
 
-
-document.addEventListener('DOMContentLoaded',init)
-
-
+ 
+document.addEventListener('DOMContentLoaded',init )
+// document.addEventListener('DOMContentLoaded',displaySwipers )
+// button.addEventListener('submit', searchMovies)
+// inputSearch.addEventListener
