@@ -12,20 +12,14 @@ const global= {
     
     }
 }
-// const btn = document.getElementsById('btn-search')
 
 async function displayPopularMovies(){
     const {results}= await fetchAPIData('movie/popular')
-    console.log(results);
-
     results.forEach((movie)=>{
         const grid= document.querySelector('#popular-movies')
         const div= document.createElement('div');
        
-        div.classList.add("card");
-        // const a = document.createElement('a')
-        // a.href={}
-   
+        div.classList.add("card");   
         div.innerHTML=`
             <a href="movie-details.html?id=${movie.id}">
             ${movie.poster_path?
@@ -60,7 +54,7 @@ async function displayMovieDetails(){
 
     displayOverLayBackground('movie', movie.backdrop_path)
 
-const div= document.createElement('div')
+    const div= document.createElement('div')
     div.classList.add('movie-details')
 
     div.innerHTML=`
@@ -116,8 +110,6 @@ const div= document.createElement('div')
 
 async function displayPopularTVShows(){
     const {results}= await fetchAPIData('tv/popular')
-    console.log(results);
-
     results.forEach((movie)=>{
         const div= document.createElement('div')
         const grid= document.querySelector('#popular-shows')
@@ -437,8 +429,6 @@ function init(){
         case '/index.html':
             displaySwipers();
             displayPopularMovies();
-            // initSwiper();
-
             break;
         case '/shows.html':
             displayPopularTVShows();
@@ -463,6 +453,3 @@ function init(){
 
  
 document.addEventListener('DOMContentLoaded',init )
-// document.addEventListener('DOMContentLoaded',displaySwipers )
-// button.addEventListener('submit', searchMovies)
-// inputSearch.addEventListener
