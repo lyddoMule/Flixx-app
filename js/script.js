@@ -181,7 +181,7 @@ async function displayTVShowDetails() {
               <i class="fas fa-star text-primary"></i>
               ${movie.vote_average.toFixed(1)} / 10
             </p>
-            <p class="text-muted">Release Date: XX/XX/XXXX</p>
+            <p class="text-muted">Release Date: ${movie.first_air_date}</p>
             <p>
             ${movie.overview}
             </p>
@@ -247,7 +247,7 @@ async function searchMovies() {
 
        if(global.search.term!=='' && global.search.term!==null){
             const {results, total_pages ,page, total_results} = await searchAPIData()
-            // console.log(results);
+            console.log(results);
             global.search.page=page;
             global.search.totalPages=total_pages;
             global.search.totalResults=total_results;
@@ -272,10 +272,13 @@ function showAlert(message, className='error'){
 }
 
 function displaySearch(results) {
-    const heading = document.createElement('heading')
-    heading.innerHTML=`<h2> ${global.search.totalResults} Search Results for "${global.search.term}"</h2>`;
-    document.querySelector('#search-results-heading').appendChild(heading)
 
+    document.querySelector('#search-results').innerHTML=''
+    document.querySelector('#search-results-heading').innerHTML=''
+    document.querySelector('#pagination').innerHTML=''
+
+ 
+    
 
     results.forEach((result)=>{
          const div = document.createElement('div')
@@ -303,44 +306,61 @@ function displaySearch(results) {
             </div>`
        document.querySelector('#search-results').appendChild(div)
  })
+    const heading = document.createElement('heading')
+    heading.innerHTML=`<h2> ${results.length} OF ${global.search.totalResults} Search Results for "${global.search.term}"</h2>`;
+    document.querySelector('#search-results-heading').appendChild(heading)
 
- const pagDiv= document.createElement('div')
- pagDiv.classList.add('pagination');
-pagDiv.innerHTML=`
-<button class="btn btn-primary" id="prev">Prev</button>
-<button class="btn btn-primary" id="next">Next</button>
-<div class="page-counter">Page ${global.search.page} of ${global.search.totalPages}</div>
+ displayPagination();
 
-`
-
- document.querySelector('#pagination').appendChild(pagDiv)
 }
+function displayPagination() {
+    const pagDiv= document.createElement('div')
+    pagDiv.classList.add('pagination');
+   pagDiv.innerHTML=`
+   <button class="btn btn-primary" id="prev">Prev</button>
+   <button class="btn btn-primary" id="next">Next</button>
+   <div class="page-counter">Page ${global.search.page} of ${global.search.totalPages}</div>
+   
+   `
+    document.querySelector('#pagination').appendChild(pagDiv)
 
-async function displaySwipers() {
-    const {results} = await fetchAPIData('movie/now_playing')
-       // console.log(results);
-    //    showAlert()
-    results.forEach((movie)=>{
-          const div= document.createElement('div');
-        div.classList.add("swiper-slide");
-        div.innerHTM=`           
-        <a href="movie-details.html?id=${movie.id}">
-             <img
-               src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
-               class="card-img-top"
-               alt="${movie.title}"
-           />
-            </a>
-        <h4 class="swiper-rating">
-            <i class="fas fa-star text-secondary"></i> ${movie.vote_average} / 10
-        </h4>`
-        document.querySelector('.swiper-wrapper').appendChild(div)
-       
-        initSwiper();
-    
+    if (global.search.page===1){
+        document.getElementById("prev").disabled = true;
+    }
+    if (global.search.page===global.search.totalPages){
+        document.getElementById("next").disabled = true;
+    }
+    document.querySelector('#next').addEventListener('click', async ()=>{
+        global.search.page++;
+        const {results, totalPages} =await searchAPIData()
+        displaySearch(results)
+    })
+    document.querySelector('#prev').addEventListener('click', async ()=>{
+        global.search.page--;
+        const {results, totalPages} =await searchAPIData()
+        displaySearch(results)
     })
 
 }
+
+async function displaySwipers() {
+    const {results}= await fetchAPIData('movie/now_playing')
+    results.forEach((movie)=>{
+        const div= document.createElement('div')
+        div.classList.add('swiper-slide')
+        div.innerHTML=`
+            <a href="movie-details.html?id=${movie.id}">
+            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}"   alt="${movie.title}" />
+        </a>
+        <h4 class="swiper-rating">
+            <i class="fas fa-star text-secondary"></i> ${movie.vote_average.toFixed(1)} / 10
+        </h4>`       
+        document.querySelector('.swiper-wrapper').appendChild(div)
+    })
+    initSwiper()
+}
+
+
 
 function initSwiper() {
     const swiper= new Swiper('.swiper',{
@@ -352,23 +372,21 @@ function initSwiper() {
             delay: 4000,
             disableOnInteraction: false,
         },
-        breakpoint:{
+        breakpoints:{
             500:{
-                slidesPerView: 2
+                slidesPerView: 3,
             },
             700:{
-                slidesPerView: 3
+                slidesPerView: 4,
             },
             1200:{
-                slidesPerView: 4
-            }
+                slidesPerView: 5,
+            },
         },
-        // pagination: {
-        //     el: '.swiper-pagination',
-        //   }
     });
-    const swiperr = document.querySelector('.swiper').swiper
 }
+
+  
 
 // Fetch data from tmdb
 async function fetchAPIData(endpoint) {
@@ -392,7 +410,7 @@ async function searchAPIData() {
     showSpinner();
     const response= await fetch(
         `${API_URL}search/${global.search.type}?api_key=${API_KEY}&
-    language=en-US&query=${global.search.term}`)
+    language=en-US&query=${global.search.term}&page=${global.search.page}`)
     const data = await response.json();
 
     hideSpinner()
