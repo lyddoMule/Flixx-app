@@ -1,7 +1,3 @@
-// const Swiper = require( 'swiper');
-
-// const button = document.getElementById('btn-search')
-// const inputSearch= document.getElementById('search-term')
 const global= {
     currentPage: window.location.pathname,
     search:{
